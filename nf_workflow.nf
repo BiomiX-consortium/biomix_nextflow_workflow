@@ -3,7 +3,7 @@ nextflow.enable.dsl=2
 
 params.publishdir = "$launchDir"
 params.outdir = ""
-params.biomix_root = "$moduleDir/bin/NextflowModules/bin/BiomiX2.5"
+params.biomix_root = "$moduleDir/bin/BiomiX2.5"
 params.command_dir = ""
 params.transcriptomics_matrix = ""
 params.methylomics_matrix = ""

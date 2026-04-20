@@ -16,6 +16,20 @@ treat as the main entry point while iterating.
 
 ## Quick start
 
+Clone the repository with submodules:
+
+```bash
+git clone --recurse-submodules <repo-url>
+cd biomix_nextflow_workflow
+```
+
+If you already cloned the repository without submodules, initialize them before
+running the workflow:
+
+```bash
+git submodule update --init --recursive
+```
+
 Run the bundled transcriptomics example:
 
 ```bash
@@ -41,6 +55,7 @@ You need:
 - Nextflow
 - Java supported by your Nextflow version
 - Conda or Mamba
+- Initialized Git submodules
 - Write permission in this repository, especially for `.nextflow/`, `work/`,
   and `nf_output/`
 
