@@ -246,7 +246,7 @@ Notes:
 
 ## Testing
 
-There are two test targets under [test/Makefile](/home/ceu/research/repos/biomix_nextflow_workflow/test/Makefile):
+There are two test targets under [test/Makefile](test/Makefile):
 
 - `make -C test test-biomix-transcriptomics-gold`
   Runs the transcriptomics example and compares selected TSV outputs against the

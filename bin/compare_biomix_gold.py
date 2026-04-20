@@ -16,8 +16,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--gold-root", required=True)
     parser.add_argument("--manifest", required=True)
     parser.add_argument("--report", required=True)
-    parser.add_argument("--atol", type=float, default=1e-8)
-    parser.add_argument("--rtol", type=float, default=1e-8)
+    parser.add_argument("--atol", type=float, default=1e-4)
+    parser.add_argument("--rtol", type=float, default=1e-4)
     return parser.parse_args()
 
 

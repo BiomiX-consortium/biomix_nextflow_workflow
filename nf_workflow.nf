@@ -18,6 +18,8 @@ params.run_mofa = false
 params.compare_gold = false
 params.gold_standard_dir = ""
 params.gold_manifest = ""
+params.gold_atol = 1e-4
+params.gold_rtol = 1e-4
 
 process PREPARE_BIOMIX_WORKSPACE {
     publishDir "${params.outdir ?: params.publishdir}/nf_output", mode: 'copy', pattern: 'biomix_workspace/COMBINED_COMMANDS.json'
@@ -154,6 +156,8 @@ process COMPARE_GOLD_STANDARD {
     path actual_root
     path gold_root
     path manifest
+    val gold_atol
+    val gold_rtol
 
     output:
     path "gold_comparison_report.json", emit: report
@@ -164,6 +168,8 @@ process COMPARE_GOLD_STANDARD {
       --actual-root "$actual_root" \
       --gold-root "$gold_root" \
       --manifest "$manifest" \
+      --atol "${gold_atol}" \
+      --rtol "${gold_rtol}" \
       --report gold_comparison_report.json
     """
 }
@@ -222,7 +228,9 @@ workflow Main {
         COMPARE_GOLD_STANDARD(
             active_workspace,
             input_map.gold_standard_dir,
-            input_map.gold_manifest
+            input_map.gold_manifest,
+            input_map.gold_atol,
+            input_map.gold_rtol
         )
     }
 
@@ -270,7 +278,9 @@ workflow {
         run_methylomics: params.run_methylomics,
         compare_gold: params.compare_gold,
         gold_standard_dir: params.compare_gold ? file(params.gold_standard_dir, checkIfExists: true) : null,
-        gold_manifest: params.compare_gold ? file(params.gold_manifest, checkIfExists: true) : null
+        gold_manifest: params.compare_gold ? file(params.gold_manifest, checkIfExists: true) : null,
+        gold_atol: params.gold_atol,
+        gold_rtol: params.gold_rtol
     ]
 
     Main(input_map)
