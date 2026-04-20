@@ -28,6 +28,15 @@ def compare_frames(actual: pd.DataFrame, gold: pd.DataFrame, atol: float, rtol: 
         errors.append("Column names differ.")
         return errors
 
+    # BiomiX output tables can be identical up to row ordering, so align by
+    # row identifier before comparing values.
+    actual = actual.sort_index().copy()
+    gold = gold.sort_index().copy()
+
+    if "ID" in actual.columns and "ID" in gold.columns:
+        actual = actual.sort_values("ID", na_position="last").reset_index(drop=True)
+        gold = gold.sort_values("ID", na_position="last").reset_index(drop=True)
+
     if actual.shape != gold.shape:
         errors.append(f"Shape differs: actual={actual.shape}, gold={gold.shape}.")
         return errors
