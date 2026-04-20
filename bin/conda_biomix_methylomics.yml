@@ -1,0 +1,19 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.11
+  - r-base=4.3
+  - r-tidyverse
+  - r-vroom
+  - r-readxl
+  - r-jsonlite
+  - r-rjson
+  - r-data.table
+  - r-matrixstats
+  - r-ggrepel
+  - r-enrichr
+  - r-circlize
+  - bioconductor-complexheatmap
+  - bioconductor-champ

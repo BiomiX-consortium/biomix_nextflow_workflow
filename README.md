@@ -1,85 +1,255 @@
-# Nextflow Template
+# BiomiX Nextflow Workflow
 
-To run the workflow to test simply do
+This repository adapts the GNPS2 Nextflow template to run parts of the
+BiomiX 2.5 pipeline in a non-interactive way.
 
-```
+The current primary use case is the transcriptomics workflow:
+
+1. Stage a temporary BiomiX workspace
+2. Load BiomiX `COMMANDS*.tsv` configuration files
+3. Run the BiomiX transcriptomics module without the GUI
+4. Write the generated BiomiX outputs into the Nextflow output directory
+
+The repository also contains scaffolding for methylomics, MOFA, and
+gold-standard comparisons, but the transcriptomics path is the one you should
+treat as the main entry point while iterating.
+
+## Quick start
+
+Run the bundled transcriptomics example:
+
+```bash
 make run
 ```
 
-To learn NextFlow checkout this documentation:
+This executes:
 
-https://www.nextflow.io/docs/latest/index.html
-
-## Installation
-
-You will need to have conda, mamba, and nextflow installed to run things locally. 
-
-## GNPS2 Workflow Input information
-
-Check the definition for the workflow input and display parameters:
-https://wang-bioinformatics-lab.github.io/GNPS2_Documentation/workflowdev/
-
-
-## Deployment to GNPS2
-
-In order to deploy, we have a set of deployment tools that will enable deployment to the various gnps2 systems. To run the deployment, you will need the following setup steps completed:
-
-1. Checked out of the deployment submodules
-1. Conda environment and dependencies
-1. SSH configuration updated
-
-### Checking out the deployment submodules
-
-use the following commands from the deploy_gnps2 folder. 
-
-You might need to checkout the module, do this by running
-
-```
-git submodule init
-git submodule update
+```bash
+nextflow run ./nf_workflow.nf -resume -c nextflow.config \
+  --biomix_root ./bin/NextflowModules/bin/BiomiX2.5 \
+  --command_dir ./test/fixtures/egas_transcriptomics_mutated_vs_unmutated \
+  --transcriptomics_matrix ./bin/NextflowModules/bin/BiomiX2.5/Example_dataset/EGAS00001001746/RNA_seq/EGAS00001001746_transcriptomics.tsv \
+  --metadata ./bin/NextflowModules/bin/BiomiX2.5/Example_dataset/EGAS00001001746/Metadata/EGAS00001001746_metadata_CLL.tsv \
+  --group_1 mutated \
+  --group_2 unmutated
 ```
 
-You will also need to specify the user on the server that you've been given that your public key has been associated with. If you want to not enter this every time you do a deployment, you can create a Makefile.credentials file in the deploy_gnps2 folder with the following contents
+## Requirements
 
-```
-USERNAME=<enter the username>
-```
+You need:
 
-### Deployment Dependencies
+- Nextflow
+- Java supported by your Nextflow version
+- Conda or Mamba
+- Write permission in this repository, especially for `.nextflow/`, `work/`,
+  and `nf_output/`
 
-You will need to install the dependencies in GNPS2_DeploymentTooling/requirements.txt on your own local machine. 
+If you previously ran Nextflow with `sudo`, fix ownership before running again:
 
-You can find this [here](https://github.com/Wang-Bioinformatics-Lab/GNPS2_DeploymentTooling).
-
-One way to do this is to use conda to create an environment, for example:
-
-```
-conda create -n deploy python=3.8
-pip install -r GNPS2_DeploymentTooling/requirements.txt
+```bash
+sudo chown -R "$USER:$USER" .nextflow work nf_output
 ```
 
-### SSH Configuration
+## Transcriptomics inputs
 
-Also update your ssh config file to include the following ssh target:
+The transcriptomics workflow needs these inputs:
 
+- `--biomix_root`
+  Path to the BiomiX 2.5 checkout used by the workflow.
+  In this repo that is normally:
+  `./bin/NextflowModules/bin/BiomiX2.5`
+
+- `--command_dir`
+  Directory containing:
+  `COMMANDS.tsv`, `COMMANDS_MOFA.tsv`, and `COMMANDS_ADVANCED.tsv`
+
+  These are BiomiX-style parameter files. The workflow copies them into a
+  staged workspace and patches the transcriptomics input path to match the file
+  passed to `--transcriptomics_matrix`.
+
+- `--transcriptomics_matrix`
+  The transcriptomics expression/count matrix to analyse.
+  Expected format is the same format accepted by BiomiX itself:
+  first column `ID`, remaining columns sample IDs.
+
+- `--metadata`
+  Metadata table used by BiomiX to match sample IDs and conditions.
+  It must contain at least an `ID` column and a `CONDITION` column.
+
+- `--group_1`
+  Name of the case condition to compare.
+  Example: `mutated`
+
+- `--group_2`
+  Name of the reference/control condition to compare.
+  Example: `unmutated`
+
+## Parameters
+
+These are the main workflow parameters relevant to transcriptomics:
+
+- `--biomix_root`
+  Root of the BiomiX 2.5 code used by the wrappers.
+
+- `--command_dir`
+  Folder with the BiomiX command tables.
+
+- `--transcriptomics_matrix`
+  Transcriptomics matrix file to analyse.
+
+- `--metadata`
+  Metadata table.
+
+- `--group_1`
+  First comparison group.
+
+- `--group_2`
+  Second comparison group.
+
+- `--transcriptomics_label`
+  BiomiX label for the transcriptomics dataset.
+  Default: `RNA`
+
+- `--publishdir`
+  Base output location.
+  Default: launch directory.
+
+- `--outdir`
+  Optional explicit output directory. If set, it overrides `publishdir`.
+
+The workflow also exposes parameters for methylomics, MOFA, and gold-standard
+comparison:
+
+- `--methylomics_matrix`
+- `--methylomics_label`
+- `--run_methylomics true`
+- `--run_mofa true`
+- `--compare_gold true`
+- `--gold_standard_dir`
+- `--gold_manifest`
+
+Those are optional for the transcriptomics-only run.
+
+## What `make run` uses
+
+The default `make run` target is configured for the bundled BiomiX CLL example:
+
+- BiomiX root:
+  `./bin/NextflowModules/bin/BiomiX2.5`
+- Commands:
+  `./test/fixtures/egas_transcriptomics_mutated_vs_unmutated`
+- Transcriptomics matrix:
+  `./bin/NextflowModules/bin/BiomiX2.5/Example_dataset/EGAS00001001746/RNA_seq/EGAS00001001746_transcriptomics.tsv`
+- Metadata:
+  `./bin/NextflowModules/bin/BiomiX2.5/Example_dataset/EGAS00001001746/Metadata/EGAS00001001746_metadata_CLL.tsv`
+- Groups:
+  `mutated` vs `unmutated`
+
+## Output layout
+
+By default, outputs are published into:
+
+```text
+nf_output/
 ```
-Host ucr-gnps2-dev
-    Hostname ucr-lemon.duckdns.org
+
+inside the directory where you launched Nextflow, unless `--outdir` is set.
+
+For the transcriptomics workflow, the most important published results are
+copied from the staged BiomiX workspace and follow the BiomiX directory layout.
+
+Typical output paths include:
+
+```text
+nf_output/Transcriptomics/OUTPUT/RNA_<group_1>_vs_<group_2>/
+nf_output/Integration/INPUT/RNA_<group_1>_vs_<group_2>/
 ```
 
-### Deploying to Dev Server
+For the bundled example, expect paths like:
 
-To deploy to development, use the following command, if you don't have your ssh public key installed onto the server, you will not be able to deploy.
-
-```
-make deploy-dev
-```
-
-### Deploying to Production Server
-
-To deploy to production, use the following command, if you don't have your ssh public key installed onto the server, you will not be able to deploy.
-
-```
-make deploy-prod
+```text
+nf_output/Transcriptomics/OUTPUT/RNA_mutated_vs_unmutated/
+nf_output/Integration/INPUT/RNA_mutated_vs_unmutated/
 ```
 
+Inside the transcriptomics output directory, BiomiX usually writes files such
+as:
+
+- differential expression tables
+- upregulated/downregulated gene tables
+- heatmaps
+- pathway analysis files
+- metadata exports
+- MOFA-preparation files under `Integration/INPUT`
+
+## Important working directories
+
+Nextflow also uses internal working directories during execution:
+
+- `.nextflow/`
+  Nextflow state and history
+- `work/`
+  Per-process work directories
+- `work/conda/`
+  Cached Conda environments
+
+If dependency changes do not seem to take effect, rebuild the cached env:
+
+```bash
+rm -rf work/conda
+```
+
+If you need a completely fresh run:
+
+```bash
+nextflow clean -f
+rm -rf work
+make run
+```
+
+## Running a custom transcriptomics dataset
+
+You can run your own transcriptomics dataset by providing your own matrix,
+metadata, and BiomiX command files:
+
+```bash
+nextflow run ./nf_workflow.nf -c nextflow.config \
+  --biomix_root /path/to/BiomiX2.5 \
+  --command_dir /path/to/command_dir \
+  --transcriptomics_matrix /path/to/transcriptomics.tsv \
+  --metadata /path/to/metadata.tsv \
+  --group_1 CASE \
+  --group_2 CONTROL
+```
+
+Notes:
+
+- `COMMANDS.tsv` must contain a transcriptomics row.
+- The workflow rewrites the transcriptomics input file path during staging, so
+  the exact original path stored inside `COMMANDS.tsv` is not important.
+- The metadata sample IDs must match the matrix column names expected by BiomiX.
+
+## Testing
+
+There are two test targets under [test/Makefile](/home/ceu/research/repos/biomix_nextflow_workflow/test/Makefile):
+
+- `make -C test test-biomix-transcriptomics-gold`
+  Runs the transcriptomics example and compares selected TSV outputs against the
+  bundled BiomiX gold standard.
+
+- `make -C test test-biomix-mofa-gold`
+  Runs the larger transcriptomics+methylomics+MOFA flow and compares selected
+  outputs against BiomiX reference files.
+
+## Current status
+
+The workflow is still being integrated with BiomiX’s original R code, which was
+written for a GUI-driven execution model. The wrappers in `bin/` bridge that
+gap by preparing the globals and working directory structure that BiomiX expects.
+
+That means:
+
+- transcriptomics is the best-supported path right now
+- methylomics and MOFA are available but still more fragile
+- when debugging, the most useful files are:
+  `nf_workflow.nf`, the wrapper scripts in `bin/`, and `.nextflow.log`

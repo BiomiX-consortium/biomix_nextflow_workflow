@@ -1,0 +1,13 @@
+{
+  "files": [
+    {
+      "relative_path": "Transcriptomics/OUTPUT/RNA_mutated_vs_unmutated/mutated_vs_unmutated/mutated_unmutated_RNA.tsv"
+    },
+    {
+      "relative_path": "Transcriptomics/OUTPUT/RNA_mutated_vs_unmutated/mutated_vs_unmutated/RNA_mutated_unmutated_GENESUP.tsv"
+    },
+    {
+      "relative_path": "Transcriptomics/OUTPUT/RNA_mutated_vs_unmutated/mutated_vs_unmutated/RNA_mutated_unmutated_GENESDOWN.tsv"
+    }
+  ]
+}
