@@ -30,6 +30,36 @@ running the workflow:
 git submodule update --init --recursive
 ```
 
+To check which BiomiX version is currently pinned by this workflow:
+
+```bash
+git submodule status --recursive
+```
+
+To update initialized submodules to the commits pinned by the current workflow
+checkout:
+
+```bash
+git submodule sync --recursive
+git submodule update --init --recursive
+```
+
+To update the BiomiX 2.5 submodule to the latest commit on its tracked upstream
+branch, run:
+
+```bash
+git submodule update --remote --merge bin/BiomiX2.5
+git status
+```
+
+If the submodule commit changed, commit both `.gitmodules` if it changed and
+the `bin/BiomiX2.5` pointer in this repository:
+
+```bash
+git add .gitmodules bin/BiomiX2.5
+git commit -m "Update BiomiX 2.5 submodule"
+```
+
 The bundled example in this repository uses `./bin/BiomiX2.5` and the
 `biomix_transcriptomics` Conda environment.
 

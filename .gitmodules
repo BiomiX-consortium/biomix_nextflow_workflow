@@ -1,3 +1,4 @@
 [submodule "bin/BiomiX2.5"]
 	path = bin/BiomiX2.5
 	url = https://github.com/BiomiX-consortium/BiomiX2.5.git
+	branch = main
