@@ -73,12 +73,10 @@ conda run -n biomix_methylomics --no-capture-output \
   nextflow run ./nf_workflow.nf -c nextflow_no_conda.config \
   --biomix_root ./bin/BiomiX2.5 \
   --command_dir ./test/fixtures/egas_transcriptomics_mutated_vs_unmutated \
-  --transcriptomics_matrix ./bin/BiomiX2.5/Example_dataset/EGAS00001001746/RNA_seq/EGAS00001001746_transcriptomics.tsv \
   --methylomics_matrix ./bin/BiomiX2.5/Example_dataset/EGAS00001001746/Methylomics/EGAS00001001746_methylomics.tsv \
   --metadata ./bin/BiomiX2.5/Example_dataset/EGAS00001001746/Metadata/EGAS00001001746_metadata_CLL.tsv \
   --group_1 mutated \
   --group_2 unmutated \
-  --transcriptomics_label RNA \
   --methylomics_label METHY \
   --run_transcriptomics false \
   --run_methylomics true \
